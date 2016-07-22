@@ -12,6 +12,21 @@ var babel = require('babelify');
 
 require('dotenv').config({silent: true});
 
+var config = {
+  bowerDir: './app/bower_components',
+  bootstrapDir: './app/bower_components/bootstrap-sass',
+  publicDir: './dist',
+};
+
+config.fontList = [
+  'app/fonts/**/*',
+  config.bootstrapDir + '/assets/fonts/**/*'
+];
+
+config.sassList = [
+  config.bootstrapDir + '/assets/stylesheets'
+];
+
 var bundler = {
   w: null,
   init: function() {
@@ -46,14 +61,13 @@ var bundler = {
 };
 
 gulp.task('styles', function() {
-  return $.rubySass('app/styles/main.scss', {
-      style: 'expanded',
-      precision: 10,
-      loadPath: ['app/bower_components']
-    })
-    .on('error', $.util.log.bind($.util, 'Sass Error'))
+  return gulp.src('./app/styles/main.scss')
+    .pipe($.sass({
+      includePaths: config.sassList,
+      loadPath: config.sassList
+    }).on('error', $.sass.logError))
     .pipe($.autoprefixer('last 1 version'))
-    .pipe(gulp.dest('dist/styles'))
+    .pipe(gulp.dest(config.publicDir + '/styles'))
     .pipe($.size());
 });
 
@@ -84,7 +98,7 @@ gulp.task('images', function() {
 });
 
 gulp.task('fonts', function() {
-  return gulp.src(['app/fonts/**/*', 'app/bower_components/bootstrap-sass-official/assets/fonts/**/*'])
+  return gulp.src(config.fontList)
     .pipe(gulp.dest('dist/fonts'))
     .pipe($.size());
 });
